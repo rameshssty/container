@@ -1,0 +1,56 @@
+ 
+https://docs.docker.com/compose/install/
+ 
+#sudo curl -L "https://github.com/docker/compose/releases/download/1.26.0/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+ 
+#sudo chmod +x /usr/local/bin/docker-compose
+ 
+#sudo ln -s /usr/local/bin/docker-compose /usr/bin/docker-compose
+ 
+#docker-compose --version
+ 
+docker-compose version 1.26.0, build d4451659
+
+
+-----------
+
+https://docs.docker.com/compose/gettingstarted/
+
+after fallowing the doc, run http://aws instance name:5000 in a separate browser
+
+[root@ip-172-31-57-5 composetest]# docker-compose --help | grep start
+  restart            Restart services
+  start              Start services
+  up                 Create and start containers
+[root@ip-172-31-57-5 composetest]# docker-compose --help | grep stop
+  rm                 Remove stopped containers
+  stop               Stop services
+[root@ip-172-31-57-5 composetest]# docker-compose --help | grep up
+  up                 Create and start containers
+[root@ip-172-31-57-5 composetest]# docker-compose --help | grep down
+  down               Stop and remove containers, networks, images, and volumes
+[root@ip-172-31-57-5 composetest]#
+
+
+[root@localhost answer]# cat docker-compose.yml
+version: '2'
+services:
+  drupal:
+    image: drupal:8.8.2
+    ports:
+      - "8080:80"
+    volumes:
+      - drupal-modules:/var/www/html/modules
+      - drupal-profiles:/var/www/html/profiles
+      - drupal-sites:/var/www/html/sites
+      - drupal-themes:/var/www/html/themes
+  postgres:
+    image: postgres:12.1
+    environment:
+      - POSTGRES_PASSWORD=mypasswd
+volumes:
+  drupal-modules:
+  drupal-profiles:
+  drupal-sites:
+  drupal-themes:
+

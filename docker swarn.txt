@@ -1,0 +1,643 @@
+docker swarn
+
+from Girijesh Prasad to everyone:
+https://speakerdeck.com/aluzzardi/heart-of-the-swarmkit-topology-management
+
+from Girijesh Prasad to everyone:
+.btaht0qm49mab2238mxi8cscl
+[node1] (local) root@192.168.0.28 ~
+$ docker service ls 
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+kmmkeam4plik        determined_bartik   replicated          0/3                 apline:latest       
+6g5ssvmg85gk        elastic_kalam       replicated          3/3                 alpine:latest       
+w8ry801z9fzj        focused_golick      replicated          0/3                 apline:latest       
+[node1] (local) root@192.168.0.28 ~
+$ docker network ls 
+NETWORK ID          NAME                DRIVER              SCOPE
+e18b14901fbb        bridge              bridge              local
+8b875ddd5fd9        docker_gwbridge     bridge              local
+d8f6e2ee61ce        host                host                local
+ek4fuvcvsv5p        ingress             overlay             swarm
+3ba193c1ff16        none                null                local
+[node1] (local) root@192.168.0.28 ~
+$ 
+
+
+----------------------------------
+
+$ ###############################################################
+#                          WARNING!!!!                        #
+# This is a sandbox environment. Using personal credentials   #
+# is HIGHLY! discouraged. Any consequences of doing so are    #
+# completely the user's responsibilites.                      #
+#                                                             #
+# The PWD team.                                               #
+###############################################################
+[node1] (local) root@192.168.0.28 ~
+
+[node1] (local) root@192.168.0.28 ~
+$ docker swarm init 
+Error response from daemon: could not choose an IP address to advertise since this system has multiple addresses on different interfaces (192.168.0.28 on eth0 and 172.18.0.46 on eth1) - specify one with --advertise-addr
+[node1] (local) root@192.168.0.28 ~
+$ docker swarm init --advertise-addr eth0
+Swarm initialized: current node (c69jp8cvb2zra0vy11tmeanap) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-39m1abi7ybgzws7vy51neeu3xbtcw7k3eezl5wbswxzna9au5s-13np4cuhxlroq75hrjd2vmhfb 192.168.0.28:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+[node1] (local) root@192.168.0.28 ~
+$ docker node ls 
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+c69jp8cvb2zra0vy11tmeanap *   node1               Ready               Active              Leader              19.03.11
+h678uue9srw0za5jg7x5erhyn     node2               Ready               Active                                  19.03.11
+[node1] (local) root@192.168.0.28 ~
+$ docker swarm join-token manager
+To add a manager to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-39m1abi7ybgzws7vy51neeu3xbtcw7k3eezl5wbswxzna9au5s-cajiebwxo59xhgbqadr1o9bs6 192.168.0.28:2377
+
+[node1] (local) root@192.168.0.28 ~
+$ docker node ls 
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+c69jp8cvb2zra0vy11tmeanap *   node1               Ready               Active              Leader              19.03.11
+h678uue9srw0za5jg7x5erhyn     node2               Ready               Active                                  19.03.11
+n60r7546mqfc9qr7xsoq6cc0s     node3               Ready               Active              Reachable           19.03.11
+[node1] (local) root@192.168.0.28 ~
+$ docker node update --role manager node2
+node2
+[node1] (local) root@192.168.0.28 ~
+$ docker node ls 
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+c69jp8cvb2zra0vy11tmeanap *   node1               Ready               Active              Leader              19.03.11
+h678uue9srw0za5jg7x5erhyn     node2               Ready               Active              Reachable           19.03.11
+n60r7546mqfc9qr7xsoq6cc0s     node3               Ready               Active              Reachable           19.03.11
+[node1] (local) root@192.168.0.28 ~
+$ docker service create --replicas 3 apline ping 8.8.8.8
+image apline:latest could not be accessed on a registry to record
+its digest. Each node will access apline:latest independently,
+possibly leading to different nodes running different
+versions of the image.
+
+kmmkeam4plikr43p6stfu0fma
+overall progress: 0 out of 3 tasks 
+1/3: preparing [=================================>                 ] 
+2/3: assigned  [======================>                            ] 
+3/3: preparing [=================================>                 ] 
+Error response from daemon: rpc error: code = DeadlineExceeded desc = context deadline exceeded
+[node1] (local) root@192.168.0.28 ~
+$ docker service create --replicas 3 apline ping 8.8.8.8
+image apline:latest could not be accessed on a registry to record
+its digest. Each node will access apline:latest independently,
+possibly leading to different nodes running different
+versions of the image.
+
+w8ry801z9fzja1r16unoxawdb
+overall progress: 0 out of 3 tasks 
+1/3: No such image: apline:latest 
+2/3: No such image: apline:latest 
+3/3: No such image: apline:latest 
+^COperation continuing in background.
+Use `docker service ps w8ry801z9fzja1r16unoxawdb` to check progress.
+[node1] (local) root@192.168.0.28 ~
+$ ^C
+[node1] (local) root@192.168.0.28 ~
+$ ^C
+[node1] (local) root@192.168.0.28 ~
+$ docker service create --replicas 3 alpine ping 8.8.8.8
+6g5ssvmg85gk6ss0miclskmyd
+overall progress: 3 out of 3 tasks 
+1/3: running   [==================================================>] 
+2/3: running   [==================================================>] 
+3/3: running   [==================================================>] 
+verify: Service converged 
+[node1] (local) root@192.168.0.28 ~
+$ docker container ls 
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+3899574660ba        alpine:latest       "ping 8.8.8.8"      59 seconds ago      Up 57 seconds                           elastic_kalam.1.btaht0qm49mab2238mxi8cscl
+[node1] (local) root@192.168.0.28 ~
+$ docker service ls 
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+kmmkeam4plik        determined_bartik   replicated          0/3                 apline:latest       
+6g5ssvmg85gk        elastic_kalam       replicated          3/3                 alpine:latest       
+w8ry801z9fzj        focused_golick      replicated          0/3                 apline:latest       
+[node1] (local) root@192.168.0.28 ~
+$ docker network ls 
+NETWORK ID          NAME                DRIVER              SCOPE
+e18b14901fbb        bridge              bridge              local
+8b875ddd5fd9        docker_gwbridge     bridge              local
+d8f6e2ee61ce        host                host                local
+ek4fuvcvsv5p        ingress             overlay             swarm
+3ba193c1ff16        none                null                local
+[node1] (local) root@192.168.0.28 ~
+$
+ play-with-docker.com
+
+[root@localhost ~]# docker info | grep -i swarm
+ Swarm: inactive
+[root@localhost ~]# docker swarm init
+Swarm initialized: current node (iucisl1ruddfd8lgwf63tedzh) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-57gt64r1gattu22ekpdm8z0xqe44hzjw55643xj2rs0men7h8u-es2vdyxile0b1j07pzjvi6zwy 192.168.229.128:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+
+[root@localhost ~]# nocker node ls
+bash: nocker: command not found...
+[root@localhost ~]# docker node ls
+ID                            HOSTNAME                STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+iucisl1ruddfd8lgwf63tedzh *   localhost.localdomain   Ready               Active              Leader              18.09.1
+[root@localhost ~]# docker node --help
+
+Usage:  docker node COMMAND
+
+Manage Swarm nodes
+
+Commands:
+  demote      Demote one or more nodes from manager in the swarm
+  inspect     Display detailed information on one or more nodes
+  ls          List nodes in the swarm
+  promote     Promote one or more nodes to manager in the swarm
+  ps          List tasks running on one or more nodes, defaults to current node
+  rm          Remove one or more nodes from the swarm
+  update      Update a node
+
+Run 'docker node COMMAND --help' for more information on a command.
+[root@localhost ~]# docker swarm --help
+
+Usage:  docker swarm COMMAND
+
+Manage Swarm
+
+Commands:
+  ca          Display and rotate the root CA
+  init        Initialize a swarm
+  join        Join a swarm as a node and/or manager
+  join-token  Manage join tokens
+  leave       Leave the swarm
+  unlock      Unlock swarm
+  unlock-key  Manage the unlock key
+  update      Update the swarm
+
+Run 'docker swarm COMMAND --help' for more information on a command.
+[root@localhost ~]# docker service --help
+
+Usage:  docker service COMMAND
+
+Manage services
+
+Commands:
+  create      Create a new service
+  inspect     Display detailed information on one or more services
+  logs        Fetch the logs of a service or task
+  ls          List services
+  ps          List the tasks of one or more services
+  rm          Remove one or more services
+  rollback    Revert changes to a service's configuration
+  scale       Scale one or multiple replicated services
+  update      Update a service
+
+Run 'docker service COMMAND --help' for more information on a command.
+[root@localhost ~]# docker run  --help
+
+Usage:  docker run [OPTIONS] IMAGE [COMMAND] [ARG...]
+
+Run a command in a new container
+
+Options:
+      --add-host list                  Add a custom host-to-IP mapping (host:ip)
+  -a, --attach list                    Attach to STDIN, STDOUT or STDERR
+      --blkio-weight uint16            Block IO (relative weight), between 10 and 1000, or 0 to disable (default 0)
+      --blkio-weight-device list       Block IO weight (relative device weight) (default [])
+      --cap-add list                   Add Linux capabilities
+      --cap-drop list                  Drop Linux capabilities
+      --cgroup-parent string           Optional parent cgroup for the container
+      --cidfile string                 Write the container ID to the file
+      --cpu-period int                 Limit CPU CFS (Completely Fair Scheduler) period
+      --cpu-quota int                  Limit CPU CFS (Completely Fair Scheduler) quota
+      --cpu-rt-period int              Limit CPU real-time period in microseconds
+      --cpu-rt-runtime int             Limit CPU real-time runtime in microseconds
+  -c, --cpu-shares int                 CPU shares (relative weight)
+      --cpus decimal                   Number of CPUs
+      --cpuset-cpus string             CPUs in which to allow execution (0-3, 0,1)
+      --cpuset-mems string             MEMs in which to allow execution (0-3, 0,1)
+  -d, --detach                         Run container in background and print container ID
+      --detach-keys string             Override the key sequence for detaching a container
+      --device list                    Add a host device to the container
+      --device-cgroup-rule list        Add a rule to the cgroup allowed devices list
+      --device-read-bps list           Limit read rate (bytes per second) from a device (default [])
+      --device-read-iops list          Limit read rate (IO per second) from a device (default [])
+      --device-write-bps list          Limit write rate (bytes per second) to a device (default [])
+      --device-write-iops list         Limit write rate (IO per second) to a device (default [])
+      --disable-content-trust          Skip image verification (default true)
+      --dns list                       Set custom DNS servers
+      --dns-option list                Set DNS options
+      --dns-search list                Set custom DNS search domains
+      --domainname string              Container NIS domain name
+      --entrypoint string              Overwrite the default ENTRYPOINT of the image
+  -e, --env list                       Set environment variables
+      --env-file list                  Read in a file of environment variables
+      --expose list                    Expose a port or a range of ports
+      --group-add list                 Add additional groups to join
+      --health-cmd string              Command to run to check health
+      --health-interval duration       Time between running the check (ms|s|m|h) (default 0s)
+      --health-retries int             Consecutive failures needed to report unhealthy
+      --health-start-period duration   Start period for the container to initialize before starting health-retries countdown (ms|s|m|h) (default 0s)
+      --health-timeout duration        Maximum time to allow one check to run (ms|s|m|h) (default 0s)
+      --help                           Print usage
+  -h, --hostname string                Container host name
+      --init                           Run an init inside the container that forwards signals and reaps processes
+  -i, --interactive                    Keep STDIN open even if not attached
+      --ip string                      IPv4 address (e.g., 172.30.100.104)
+      --ip6 string                     IPv6 address (e.g., 2001:db8::33)
+      --ipc string                     IPC mode to use
+      --isolation string               Container isolation technology
+      --kernel-memory bytes            Kernel memory limit
+  -l, --label list                     Set meta data on a container
+      --label-file list                Read in a line delimited file of labels
+      --link list                      Add link to another container
+      --link-local-ip list             Container IPv4/IPv6 link-local addresses
+      --log-driver string              Logging driver for the container
+      --log-opt list                   Log driver options
+      --mac-address string             Container MAC address (e.g., 92:d0:c6:0a:29:33)
+  -m, --memory bytes                   Memory limit
+      --memory-reservation bytes       Memory soft limit
+      --memory-swap bytes              Swap limit equal to memory plus swap: '-1' to enable unlimited swap
+      --memory-swappiness int          Tune container memory swappiness (0 to 100) (default -1)
+      --mount mount                    Attach a filesystem mount to the container
+      --name string                    Assign a name to the container
+      --network network                Connect a container to a network
+      --network-alias list             Add network-scoped alias for the container
+      --no-healthcheck                 Disable any container-specified HEALTHCHECK
+      --oom-kill-disable               Disable OOM Killer
+      --oom-score-adj int              Tune host's OOM preferences (-1000 to 1000)
+      --pid string                     PID namespace to use
+      --pids-limit int                 Tune container pids limit (set -1 for unlimited)
+      --privileged                     Give extended privileges to this container
+  -p, --publish list                   Publish a container's port(s) to the host
+  -P, --publish-all                    Publish all exposed ports to random ports
+      --read-only                      Mount the container's root filesystem as read only
+      --restart string                 Restart policy to apply when a container exits (default "no")
+      --rm                             Automatically remove the container when it exits
+      --runtime string                 Runtime to use for this container
+      --security-opt list              Security Options
+      --shm-size bytes                 Size of /dev/shm
+      --sig-proxy                      Proxy received signals to the process (default true)
+      --stop-signal string             Signal to stop a container (default "SIGTERM")
+      --stop-timeout int               Timeout (in seconds) to stop a container
+      --storage-opt list               Storage driver options for the container
+      --sysctl map                     Sysctl options (default map[])
+      --tmpfs list                     Mount a tmpfs directory
+  -t, --tty                            Allocate a pseudo-TTY
+      --ulimit ulimit                  Ulimit options (default [])
+  -u, --user string                    Username or UID (format: <name|uid>[:<group|gid>])
+      --userns string                  User namespace to use
+      --uts string                     UTS namespace to use
+  -v, --volume list                    Bind mount a volume
+      --volume-driver string           Optional volume driver for the container
+      --volumes-from list              Mount volumes from the specified container(s)
+  -w, --workdir string                 Working directory inside the container
+[root@localhost ~]# docker images
+REPOSITORY                               TAG                 IMAGE ID            CREATED             SIZE
+bretfisher/jekyll-serve                  latest              c098d75a5697        6 days ago          383MB
+girijeshcse/php                          mysqli              134210ae2661        2 weeks ago         414MB
+python                                   3.7-alpine          6a5ca85ed89b        2 weeks ago         72.5MB
+php                                      apache              adf6433169ea        2 weeks ago         414MB
+girijeshcse/nettools                     allow-override      49b27d53af14        3 weeks ago         145MB
+girijeshcse/nettools                     latest              47614dccdfff        3 weeks ago         145MB
+girijeshcse/dockerping                   0.0.1               35b61b4bd359        3 weeks ago         114MB
+girijeshcse/dockerping                   latest              35b61b4bd359        3 weeks ago         114MB
+alpine                                   <none>              a24bb4013296        3 weeks ago         5.57MB
+mariadb                                  latest              ac9c11a18222        3 weeks ago         357MB
+maven                                    3.6.3-jdk-8-slim    62d0f14f1ce9        5 weeks ago         303MB
+nginx                                    girijesh_web        9beeba249f3e        5 weeks ago         127MB
+nginx                                    latest              9beeba249f3e        5 weeks ago         127MB
+httpd                                    latest              d4e60c8eb27a        5 weeks ago         166MB
+debian                                   stable              8d679944ec71        5 weeks ago         114MB
+debian                                   buster-slim         108d75da320f        5 weeks ago         69.2MB
+debian                                   latest              5971ee6076a0        5 weeks ago         114MB
+python                                   alpine3.10          0b4259061163        5 weeks ago         109MB
+mysql/mysql-server                       latest              716286be47c6        8 weeks ago         381MB
+ubuntu                                   latest              1d622ef86b13        8 weeks ago         73.9MB
+ubuntu                                   bionic              c3c304cb4f22        8 weeks ago         64.2MB
+registry.hub.docker.com/library/ubuntu   bionic              c3c304cb4f22        8 weeks ago         64.2MB
+drupal                                   8.8.2               090e3f252532        3 months ago        454MB
+postgres                                 12.1                cf879a45faaa        4 months ago        394MB
+hello-world                              latest              bf756fb1ae65        5 months ago        13.3kB
+openjdk                                  8-jdk-alpine        a3562aa0b991        13 months ago       105MB
+[root@localhost ~]# docker system prune
+WARNING! This will remove:
+  - all stopped containers
+  - all networks not used by at least one container
+  - all dangling images
+  - all dangling build cache
+
+Are you sure you want to continue? [y/N] y
+Deleted Networks:
+answer_default
+
+Deleted Images:
+untagged: alpine@sha256:185518070891758909c9f839cf4ca393ee977ac378609f700f60a771a2dfe321
+deleted: sha256:a24bb4013296f61e89ba57005a7b3e52274d8edd3ae2077d04395f806b63d83e
+
+Total reclaimed space: 0B
+[root@localhost ~]# docker rmi c098d75a5697 134210ae2661 6a5ca85ed89b adf6433169ea
+Untagged: bretfisher/jekyll-serve:latest
+Untagged: bretfisher/jekyll-serve@sha256:701b6c4778cf85987b3693f7c6b4bf9b950f9973e6890a3e5ae6f5a7fde07f3a
+Deleted: sha256:c098d75a56972bea2059154f37b8ab506f5ea2a36e88785125873b7ce2c8d9df
+Deleted: sha256:631fc4d3b68e1f80d68104afbf2eee8fb1c224560df341814822c496cbba1436
+Deleted: sha256:245f311d8bdf7f410a4db20736e69ba97eb9317443db9e81cb4a9530e3aaa633
+Deleted: sha256:4fd7c7e8e6bc59cbd34582b3a97fdecb9bd89a9e84cb6bc0fcea022103fbc5b2
+Deleted: sha256:67d44b9a8ea815483fd3b45da93686c192ea7cf5daa349317a1a3b05b7d11e00
+Deleted: sha256:9f1db8d19a88250f6324c9a69b4ab67f98553b9a8d68450532f5e1b73461baf6
+Deleted: sha256:8971050a7d195ed38cbc01b46bb4846354830a101eff844226d741cfef9ae419
+Deleted: sha256:9941c530c24ac213844a1c809db74816c7e31b78956ec938908d0bb5d7632f35
+Deleted: sha256:d85f23bc8798cbff15aecfe94e14801481750b830d1cb5099a62caa2150e0b03
+Untagged: girijeshcse/php:mysqli
+Untagged: girijeshcse/php@sha256:695010134fe8936675f7866e94d9992a9423e546c746db6db0d940b34caacff9
+Deleted: sha256:134210ae26611db43280ff908f5449d6c2bd812884ea2e6866089d9376e6854f
+Deleted: sha256:9828f2f52e2b5636db5f4ace73f56c40a4c5a8e9d2ba239e7eff532dc59884ee
+Untagged: python:3.7-alpine
+Untagged: python@sha256:4bc145d0bfababffd78b6106abd41000aa5dcc28cd0cfe5f988a415d1985667f
+Deleted: sha256:6a5ca85ed89b3a201b3584237530296d28a01e5c41c630708f00e25842a361ad
+Deleted: sha256:f15797cd4a764af518547bdb23cb333137dd0eebaf10504116a4a10c3409c638
+Deleted: sha256:2aa448382ab9eedd2f8a220bdcff9a224c2ca8f13b5bd6593172fdf363d788ec
+Deleted: sha256:dfac622b39da7cb87e4f5806d67b3246822784a9f4a271598eeefff5f06c3928
+Deleted: sha256:568efafabdbb713c0daa32533cb71aba1dd3cd1750b4713cb68f3ec3088a70ac
+Deleted: sha256:50644c29ef5a27c9a40c393a73ece2479de78325cae7d762ef3cdc19bf42dd0a
+Untagged: php:apache
+Untagged: php@sha256:0bda3d89a27ee6fd95549e3ae413d7863e05a95e346289f47712f0fd92189ade
+Deleted: sha256:adf6433169eab5b7df0f8c7c133c0a4e22ce7ae1b98fa46e5b242d9dda1b86e5
+Deleted: sha256:0a69dcbef686eaf813e028d91c6503b1c7e493257be9c573b700970a1bf09ee0
+Deleted: sha256:c6560657435f75660c0cca474163bbdcf2a63b711b567fbeda5d1f9d3232d173
+Deleted: sha256:e7bc7973ed783ea75c55707b91ce634aa95c3b72420b0ade7b4a3ab65a406f3d
+Deleted: sha256:02bedfdedff81bb89da776cb57e82f83fa5b76acf6850d32bb4085d04e287929
+Deleted: sha256:1ba5e37232914e8f7351673b59d2919ad6d696ab425b92b4a922b2b746a295d0
+Deleted: sha256:451e290c72cef75fb1a95069879e2e26a6df15c106d1b460dfe57904b489f6f5
+Deleted: sha256:92d270b906147bd4416e39dc9de13c7906785164f1838a61c2fed0152dc3af3c
+Deleted: sha256:ac7d74cc5340c7b8c1962005657b20b2275b3679aedeacae5a01c74f0d0a602f
+Deleted: sha256:0c5eff316d22783eaf4de03b021ebe88c19241a0a7a13206e9cd1db23ca7dcf1
+Deleted: sha256:e034a8beee6faaa0afb038a841ac0f0b230e2d9604ae6d5f2dfdefb956b7801a
+Deleted: sha256:891a2717569c40be7e08bbafe0ef074a0f6dbb90f45429cf016e17eb55523dcf
+Deleted: sha256:8072103e605f90bb9a6b6c5cbd47e569908516c37e434b9b4285185e9e907630
+[root@localhost ~]# docker service create alpine ping 8.8.8.8
+gx7pi2rxu3hzm01ljrp0za5j7
+overall progress: 1 out of 1 tasks
+1/1: running   [==================================================>]
+verify: Service converged
+[root@localhost ~]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+gx7pi2rxu3hz        practical_clarke    replicated          1/1                 alpine:latest
+[root@localhost ~]# docker serice ps
+docker: 'serice' is not a docker command.
+See 'docker --help'
+[root@localhost ~]# docker service ps
+"docker service ps" requires at least 1 argument.
+See 'docker service ps --help'.
+
+Usage:  docker service ps [OPTIONS] SERVICE [SERVICE...]
+
+List the tasks of one or more services
+[root@localhost ~]# docker service ps practical_clarke
+ID                  NAME                 IMAGE               NODE                    DESIRED STATE       CURRENT STATE                ERROR               PORTS
+v5f3nmkdu926        practical_clarke.1   alpine:latest       localhost.localdomain   Running             Running about a minute ago
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED              STATUS              PORTS               NAMES
+589a304e7939        alpine:latest       "ping 8.8.8.8"      About a minute ago   Up About a minute                       practical_clarke.1.v5f3nmkdu926ojmjz24fmncu2
+[root@localhost ~]# docker service update practical_clarke --replicas 3
+practical_clarke
+overall progress: 3 out of 3 tasks
+1/3: running   [==================================================>]
+2/3: running   [==================================================>]
+3/3: running   [==================================================>]
+verify: Service converged
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+72300c38d6e7        alpine:latest       "ping 8.8.8.8"      19 seconds ago      Up 17 seconds                           practical_clarke.3.15y0yw2g8qolqhefex64beyyw
+130c59980fab        alpine:latest       "ping 8.8.8.8"      19 seconds ago      Up 17 seconds                           practical_clarke.2.l82i9x5puw3p6np2d4poue0nv
+589a304e7939        alpine:latest       "ping 8.8.8.8"      4 minutes ago       Up 4 minutes                            practical_clarke.1.v5f3nmkdu926ojmjz24fmncu2
+[root@localhost ~]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+gx7pi2rxu3hz        practical_clarke    replicated          3/3                 alpine:latest
+[root@localhost ~]# docker conatiner rm -f practical_clarke.1.v5f3nmkdu926ojmjz24fmncu2
+unknown shorthand flag: 'f' in -f
+See 'docker --help'.
+
+Usage:  docker [OPTIONS] COMMAND
+
+A self-sufficient runtime for containers
+
+Options:
+      --config string      Location of client config files (default "/root/.docker")
+  -c, --context string     Name of the context to use to connect to the daemon (overrides DOCKER_HOST env var and default context set with "docker context use")
+  -D, --debug              Enable debug mode
+  -H, --host list          Daemon socket(s) to connect to
+  -l, --log-level string   Set the logging level ("debug"|"info"|"warn"|"error"|"fatal") (default "info")
+      --tls                Use TLS; implied by --tlsverify
+      --tlscacert string   Trust certs signed only by this CA (default "/root/.docker/ca.pem")
+      --tlscert string     Path to TLS certificate file (default "/root/.docker/cert.pem")
+      --tlskey string      Path to TLS key file (default "/root/.docker/key.pem")
+      --tlsverify          Use TLS and verify the remote
+  -v, --version            Print version information and quit
+
+Management Commands:
+  builder     Manage builds
+  config      Manage Docker configs
+  container   Manage containers
+  context     Manage contexts
+  engine      Manage the docker engine
+  image       Manage images
+  network     Manage networks
+  node        Manage Swarm nodes
+  plugin      Manage plugins
+  secret      Manage Docker secrets
+  service     Manage services
+  stack       Manage Docker stacks
+  swarm       Manage Swarm
+  system      Manage Docker
+  trust       Manage trust on Docker images
+  volume      Manage volumes
+
+Commands:
+  attach      Attach local standard input, output, and error streams to a running container
+  build       Build an image from a Dockerfile
+  commit      Create a new image from a container's changes
+  cp          Copy files/folders between a container and the local filesystem
+  create      Create a new container
+  diff        Inspect changes to files or directories on a container's filesystem
+  events      Get real time events from the server
+  exec        Run a command in a running container
+  export      Export a container's filesystem as a tar archive
+  history     Show the history of an image
+  images      List images
+  import      Import the contents from a tarball to create a filesystem image
+  info        Display system-wide information
+  inspect     Return low-level information on Docker objects
+  kill        Kill one or more running containers
+  load        Load an image from a tar archive or STDIN
+  login       Log in to a Docker registry
+  logout      Log out from a Docker registry
+  logs        Fetch the logs of a container
+  pause       Pause all processes within one or more containers
+  port        List port mappings or a specific mapping for the container
+  ps          List containers
+  pull        Pull an image or a repository from a registry
+  push        Push an image or a repository to a registry
+  rename      Rename a container
+  restart     Restart one or more containers
+  rm          Remove one or more containers
+  rmi         Remove one or more images
+  run         Run a command in a new container
+  save        Save one or more images to a tar archive (streamed to STDOUT by default)
+  search      Search the Docker Hub for images
+  start       Start one or more stopped containers
+  stats       Display a live stream of container(s) resource usage statistics
+  stop        Stop one or more running containers
+  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+  top         Display the running processes of a container
+  unpause     Unpause all processes within one or more containers
+  update      Update configuration of one or more containers
+  version     Show the Docker version information
+  wait        Block until one or more containers stop, then print their exit codes
+
+Run 'docker COMMAND --help' for more information on a command.
+
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+72300c38d6e7        alpine:latest       "ping 8.8.8.8"      2 minutes ago       Up 2 minutes                            practical_clarke.3.15y0yw2g8qolqhefex64beyyw
+130c59980fab        alpine:latest       "ping 8.8.8.8"      2 minutes ago       Up 2 minutes                            practical_clarke.2.l82i9x5puw3p6np2d4poue0nv
+589a304e7939        alpine:latest       "ping 8.8.8.8"      6 minutes ago       Up 6 minutes                            practical_clarke.1.v5f3nmkdu926ojmjz24fmncu2
+[root@localhost ~]# docker conatiner rm -f 589a304e7939
+unknown shorthand flag: 'f' in -f
+See 'docker --help'.
+
+Usage:  docker [OPTIONS] COMMAND
+
+A self-sufficient runtime for containers
+
+Options:
+      --config string      Location of client config files (default "/root/.docker")
+  -c, --context string     Name of the context to use to connect to the daemon (overrides DOCKER_HOST env var and default context set with "docker context use")
+  -D, --debug              Enable debug mode
+  -H, --host list          Daemon socket(s) to connect to
+  -l, --log-level string   Set the logging level ("debug"|"info"|"warn"|"error"|"fatal") (default "info")
+      --tls                Use TLS; implied by --tlsverify
+      --tlscacert string   Trust certs signed only by this CA (default "/root/.docker/ca.pem")
+      --tlscert string     Path to TLS certificate file (default "/root/.docker/cert.pem")
+      --tlskey string      Path to TLS key file (default "/root/.docker/key.pem")
+      --tlsverify          Use TLS and verify the remote
+  -v, --version            Print version information and quit
+
+Management Commands:
+  builder     Manage builds
+  config      Manage Docker configs
+  container   Manage containers
+  context     Manage contexts
+  engine      Manage the docker engine
+  image       Manage images
+  network     Manage networks
+  node        Manage Swarm nodes
+  plugin      Manage plugins
+  secret      Manage Docker secrets
+  service     Manage services
+  stack       Manage Docker stacks
+  swarm       Manage Swarm
+  system      Manage Docker
+  trust       Manage trust on Docker images
+  volume      Manage volumes
+
+Commands:
+  attach      Attach local standard input, output, and error streams to a running container
+  build       Build an image from a Dockerfile
+  commit      Create a new image from a container's changes
+  cp          Copy files/folders between a container and the local filesystem
+  create      Create a new container
+  diff        Inspect changes to files or directories on a container's filesystem
+  events      Get real time events from the server
+  exec        Run a command in a running container
+  export      Export a container's filesystem as a tar archive
+  history     Show the history of an image
+  images      List images
+  import      Import the contents from a tarball to create a filesystem image
+  info        Display system-wide information
+  inspect     Return low-level information on Docker objects
+  kill        Kill one or more running containers
+  load        Load an image from a tar archive or STDIN
+  login       Log in to a Docker registry
+  logout      Log out from a Docker registry
+  logs        Fetch the logs of a container
+  pause       Pause all processes within one or more containers
+  port        List port mappings or a specific mapping for the container
+  ps          List containers
+  pull        Pull an image or a repository from a registry
+  push        Push an image or a repository to a registry
+  rename      Rename a container
+  restart     Restart one or more containers
+  rm          Remove one or more containers
+  rmi         Remove one or more images
+  run         Run a command in a new container
+  save        Save one or more images to a tar archive (streamed to STDOUT by default)
+  search      Search the Docker Hub for images
+  start       Start one or more stopped containers
+  stats       Display a live stream of container(s) resource usage statistics
+  stop        Stop one or more running containers
+  tag         Create a tag TARGET_IMAGE that refers to SOURCE_IMAGE
+  top         Display the running processes of a container
+  unpause     Unpause all processes within one or more containers
+  update      Update configuration of one or more containers
+  version     Show the Docker version information
+  wait        Block until one or more containers stop, then print their exit codes
+
+Run 'docker COMMAND --help' for more information on a command.
+
+[root@localhost ~]# docker container rm -f 589a304e7939
+589a304e7939
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+72300c38d6e7        alpine:latest       "ping 8.8.8.8"      3 minutes ago       Up 3 minutes                            practical_clarke.3.15y0yw2g8qolqhefex64beyyw
+130c59980fab        alpine:latest       "ping 8.8.8.8"      3 minutes ago       Up 3 minutes                            practical_clarke.2.l82i9x5puw3p6np2d4poue0nv
+[root@localhost ~]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+gx7pi2rxu3hz        practical_clarke    replicated          3/3                 alpine:latest
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+b1e5d2371405        alpine:latest       "ping 8.8.8.8"      17 seconds ago      Up 11 seconds                           practical_clarke.1.y2glzhes4b1m6zrybu90rbiix
+72300c38d6e7        alpine:latest       "ping 8.8.8.8"      3 minutes ago       Up 3 minutes                            practical_clarke.3.15y0yw2g8qolqhefex64beyyw
+130c59980fab        alpine:latest       "ping 8.8.8.8"      3 minutes ago       Up 3 minutes                            practical_clarke.2.l82i9x5puw3p6np2d4poue0nv
+[root@localhost ~]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+gx7pi2rxu3hz        practical_clarke    replicated          3/3                 alpine:latest
+[root@localhost ~]# docker container rm -f 130c59980fab
+130c59980fab
+[root@localhost ~]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+gx7pi2rxu3hz        practical_clarke    replicated          2/3                 alpine:latest
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+c9ad922bc3ca        alpine:latest       "ping 8.8.8.8"      7 seconds ago       Up 1 second                             practical_clarke.2.uadru79pbw9qsjh6t24l798q9
+b1e5d2371405        alpine:latest       "ping 8.8.8.8"      58 seconds ago      Up 53 seconds                           practical_clarke.1.y2glzhes4b1m6zrybu90rbiix
+72300c38d6e7        alpine:latest       "ping 8.8.8.8"      4 minutes ago       Up 4 minutes                            practical_clarke.3.15y0yw2g8qolqhefex64beyyw
+[root@localhost ~]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+gx7pi2rxu3hz        practical_clarke    replicated          3/3                 alpine:latest
+[root@localhost ~]# docker service rm practical_clarke
+practical_clarke
+[root@localhost ~]# docker service ls
+ID                  NAME                MODE                REPLICAS            IMAGE               PORTS
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+c9ad922bc3ca        alpine:latest       "ping 8.8.8.8"      2 minutes ago       Up 2 minutes                            practical_clarke.2.uadru79pbw9qsjh6t24l798q9
+b1e5d2371405        alpine:latest       "ping 8.8.8.8"      3 minutes ago       Up 3 minutes                            practical_clarke.1.y2glzhes4b1m6zrybu90rbiix
+72300c38d6e7        alpine:latest       "ping 8.8.8.8"      6 minutes ago       Up 6 minutes                            practical_clarke.3.15y0yw2g8qolqhefex64beyyw
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+c9ad922bc3ca        alpine:latest       "ping 8.8.8.8"      2 minutes ago       Up 2 minutes                            practical_clarke.2.uadru79pbw9qsjh6t24l798q9
+b1e5d2371405        alpine:latest       "ping 8.8.8.8"      3 minutes ago       Up 3 minutes                            practical_clarke.1.y2glzhes4b1m6zrybu90rbiix
+72300c38d6e7        alpine:latest       "ping 8.8.8.8"      6 minutes ago       Up 6 minutes                            practical_clarke.3.15y0yw2g8qolqhefex64beyyw
+[root@localhost ~]# docker container ls
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
+[root@localhost ~]#

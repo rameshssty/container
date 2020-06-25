@@ -1,0 +1,94 @@
+702  docker run -dit -p 8080:80 php:apache
+  703  docker ps
+  704  docker run -dit -p 8090:80 php:apache
+  705  docker ps
+  706  iptables
+  707  iptables -nL "DOCKER"
+  708  curl http://172.17.0.2
+  709  curl http://127.0.0.1
+  710  curl http://127.0.0.1:8090
+  
+  713  iptables -nL "DOCKER"
+  
+  715  docker run -dit --network host php:apache
+  716  docker ps
+  717  iptables -nL "DOCKER"
+  718  curl http://127.0.0.1
+  719  
+  720  docker network ls
+  721  
+  722  docker network inspect  bridge
+  723  docker ps
+  724  docker run --name w1 -dit php:apache
+  725  docker network inspect  bridge
+  726  docker run --name w2 -dit php:apache
+  727  docker network inspect  bridge
+  728  docker exec -it w1 bash
+  729  docker logs w2
+  730  docker network create blog
+  731  docker network ls
+  732  docker volume create blog_web_data
+  733  docker run --name web --network blog -p 80:80 --mount src=blog_web_data,dst=/var/www/html -dit php:apache
+  734  docker network inspect blog
+  735  docker exec -it w1 bash
+  736  docker volume create blog_db_data
+  737  docker run --name db --network blog -e MYSQL_ROOT_PASSWORD=pass1234 -e MYSQL_DATABASE=wordpress --mount src=blog_db_data,dst=/var/lib/mysql -d mariadb
+  738  docker network inspect blog
+  739  docker volume inspect blog_db_data
+  740  ls /var/lib/docker/volumes/blog_db_data/_data
+  741  docker exec -it web bash
+  742  docker network connect --help
+  743  docker exec -it web bash
+  744  docker stop web
+  745  docker start web
+  746  docker top web
+  747  docker volume inspect blog_web_data
+  748  cd /var/lib/docker/volumes/blog_web_data/_data
+  749  ls
+  750  wget https://wordpress.org/wordpress-5.2.3.tar.gz
+  751  ls
+  752  tar zxvf wordpress-5.2.3.tar.gz wordpress/
+
+
+
+
+[10:24 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: Goal:
+The goal of this exercise is to create a user-defined network for a web application called Drupal.
+Instructions:
+Create a Network for the Drupal Web Application
+Create a Docker bridged network named "drupal".
+docker network create drupal
+[10:25 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: Create a Database Container.
+First, create a volume that will be used to store the database data. Name the volume "db".
+docker volume create db
+Next, start a container named "db" based on the "postgres" image with a tag of "11.5". Make sure it
+is connected to the "drupal" network. Also, mount the "db" volume to "/var/lib/postgresql/data"
+inside the container.
+Create a database named "drupal" that can be accessed by a "drupal" user with a password of
+"pw123". To do that, set the following environment variables when starting the container:
+POSTGRES_USER=drupal
+POSTGRES_PASSWORD=pw123
+POSTGRES_DB=drupal
+[10:25 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: Here is the command: (NOTE: Type this all on one line as this is a single command.)
+docker run -d --network drupal --name db -e POSTGRES_DB=drupal
+-e POSTGRES_USER=drupal -e POSTGRES_PASSWORD=pw123
+--mount src=db,dst=/var/lib/postgresql/data postgres:11.5
+[10:25 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: Inspect the "drupal" network to make sure the container is attached to it. You should see the "db"
+container listed in the "Containers" section of the output.
+docker network inspect drupal
+[10:26 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: Create a Drupal Application Container
+Start a container named "drupal" based on the "drupal" image with a tag of "8.7.7". Make sure it is
+connected to the "drupal" network. Also, publish port 80 on the host and map it to port 80 in the
+container.
+docker run -d --network drupal --name drupal -p 80:80 drupal:8.7.7
+Inspect the "drupal" network to make sure the container is attached to it. You should see the
+"drupal" container listed in the "Containers" section of the output.
+docker network inspect drupal
+[10:29 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: 1. docker network create drupal
+[10:30 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: for db container create
+[10:30 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: docker volume create db
+[10:31 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: docker run -d --network drupal --name db -e POSTGRES_DB=drupal
+-e POSTGRES_USER=drupal -e POSTGRES_PASSWORD=pw123
+--mount src=db,dst=/var/lib/postgresql/data postgres:11.5
+[10:31 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: for Create a Drupal Application Container
+[10:31 PM, 6/9/2020] Girijesh Morgan Stanley Company Linux Wattsapp: docker run -d --network drupal --name drupal -p 80:80 drupal:8.7.7
